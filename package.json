@@ -1,0 +1,25 @@
+{
+    "name": "floorbot-archive",
+    "version": "1.0.0",
+    "description": "An archive bot to store anything and everything",
+    "main": "src/index.js",
+    "scripts": {
+        "test": "nodemon --ignore \"*.json\" src/app.js",
+        "start": "node src/app.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/floorbot-js/floorbot.git"
+    },
+    "author": "Arcadeena",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/floorbot-js/floorbot/issues"
+    },
+    "homepage": "https://github.com/floorbot-js/floorbot#readme",
+    "dependencies": {
+        "discord.js": "^12.5.1",
+        "dotenv": "^8.2.0",
+        "mariadb": "^2.5.3"
+    }
+}
