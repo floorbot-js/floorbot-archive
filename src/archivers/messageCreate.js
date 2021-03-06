@@ -227,7 +227,7 @@ function messageEmbedAuthor(data, connection) {
 function messageEmbedFooter(data, connection) {
     return Promise.all(data.embeds.map((embed, pos) => {
         if (!embed.footer) return Promise.resolve();
-        return connection.query('REPLACE INTO message_embed_footer VALUES (?, ?, ?, ?, ?, ?, ?)', [
+        return connection.query('REPLACE INTO message_embed_footer VALUES (?, ?, ?, ?, ?, ?)', [
             new Date(data.edited_timestamp || data.timestamp).getTime(),
             data.id,
             pos,

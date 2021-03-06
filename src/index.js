@@ -15,11 +15,12 @@ module.exports = (client) => {
     })
 
     const messageCreate = require('./archivers/messageCreate');
-    const messageUpdate = require('./archivers/messageCreate');
+    const messageUpdate = require('./archivers/messageUpdate');
     const messageDelete = require('./archivers/messageDelete');
     const messageReaction = require('./archivers/messageReaction');
 
     client.on('raw', packet => {
+        if (packet.t) console.log('Event', packet.t);
         switch (packet.t) {
 
             case 'MESSAGE_CREATE':
