@@ -18,9 +18,31 @@ module.exports = (client) => {
     const messageUpdate = require('./archivers/messageUpdate');
     const messageDelete = require('./archivers/messageDelete');
     const messageReaction = require('./archivers/messageReaction');
+    const presenceUpdate = require('./archivers/presenceUpdate');
 
+    const totals = {};
     client.on('raw', packet => {
-        if (packet.t) console.log('Event', packet.t);
+        if (packet.t) {
+            if (Object.keys(totals).length) {
+                for (let i = 0; i < Object.keys(totals).length + 3; i++) {
+                    process.stdout.moveCursor(0, -1) // up one line
+                    process.stdout.clearLine(1) // from cursor to end
+                }
+            }
+
+            if (!totals[packet.t]) totals[packet.t] = 0;
+            totals[packet.t]++;
+
+            console.log();
+            console.log('----------Totals----------');
+            Object.keys(totals).forEach(key => {
+                if (key === packet.t) console.log(key, totals[key], '(latest)')
+                else console.log(key, totals[key])
+            })
+            console.log('--------------------------');
+        }
+
+        // if (packet.t) console.log('[', new Date(), ']', 'Event', counter++, packet.t);
         switch (packet.t) {
 
             case 'MESSAGE_CREATE':
@@ -39,6 +61,9 @@ module.exports = (client) => {
                 return messageReaction.removeAll(client, packet, pool);
             case 'MESSAGE_REACTION_REMOVE_EMOJI':
                 return messageReaction.removeEmoji(client, packet, pool);
+
+            case 'PRESENCE_UPDATE':
+                return presenceUpdate(client, packet, pool);
 
             case 'CHANNEL_PINS_UPDATE': // This causes a message update too
             default:
