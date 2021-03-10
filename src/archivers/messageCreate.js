@@ -196,7 +196,7 @@ function messageEmbedField(data, connection) {
     return Promise.all(data.embeds.map((embed, pos) => {
         if (!embed.fields) return Promise.resolve();
         return Promise.all(embed.fields.map((field, fieldPos) => {
-            return connection.query('REPLACE INTO message_embed_video VALUES (?, ?, ?, ?, ?, ?, ?)', [
+            return connection.query('REPLACE INTO message_embed_field VALUES (?, ?, ?, ?, ?, ?, ?)', [
                 new Date(data.edited_timestamp || data.timestamp).getTime(),
                 data.id,
                 pos,
