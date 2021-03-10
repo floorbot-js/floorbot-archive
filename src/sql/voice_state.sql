@@ -4,7 +4,6 @@ CREATE TABLE voice_state (
     guild_id BIGINT,
     channel_id BIGINT,
     user_id BIGINT NOT NULL,
-    -- [ommited] member
     session_id VARCHAR(256) NOT NULL,
     deaf BOOLEAN NOT NULL,
     mute BOOLEAN NOT NULL,
@@ -12,6 +11,5 @@ CREATE TABLE voice_state (
     self_mute BOOLEAN NOT NULL,
     self_stream BOOLEAN NOT NULL,
     self_video BOOLEAN NOT NULL,
-    -- [ommited] supress
     CONSTRAINT id PRIMARY KEY (epoch)
 );

@@ -54,14 +54,13 @@ module.exports = (client) => {
                     return presenceUpdate(client, packet, pool);
                 case 'VOICE_STATE_UPDATE':
                     return voiceStateUpdate(client, packet, pool);
-                case 'CHANNEL_PINS_UPDATE': // This causes a message update too
+                    // case 'CHANNEL_PINS_UPDATE': // This causes a message update too
                 default:
                     // return console.log('packet', packet.t);
                     return null;
             }
         }).catch(err => {
-            console.log(err);
-            console.log('Database down...');
+            console.log('Database Error', err);
         });
     });
 }
