@@ -21,16 +21,31 @@ module.exports = (client) => {
     const messageReaction = require('./archivers/messageReaction');
     const presenceUpdate = require('./archivers/presenceUpdate');
     const voiceStateUpdate = require('./archivers/voiceStateUpdate');
+    const typingStart = require('./archivers/typingStart');
 
+    const tracked = [
+        'MESSAGE_CREATE',
+        'MESSAGE_UPDATE',
+        'MESSAGE_DELETE',
+        'MESSAGE_DELETE_BULK',
+        'MESSAGE_REACTION_ADD',
+        'MESSAGE_REACTION_REMOVE',
+        'MESSAGE_REACTION_REMOVE_ALL',
+        'MESSAGE_REACTION_REMOVE_EMOJI',
+        'PRESENCE_UPDATE',
+        'VOICE_STATE_UPDATE',
+        'TYPING_START'
+    ];
     const totals = {};
     client.on('raw', packet => {
         return new Promise((resolve, reject) => {
             if (packet.t) {
                 totals[packet.t] = totals[packet.t] ? ++totals[packet.t] : 1;
-                console.log('\x1b[31m', '\n--------- Totals ---------', '\x1b[0m');
+                console.log('\x1b[91m', '\n-------------- Totals --------------', '\x1b[0m');
                 Object.keys(totals).forEach(key => {
-                    if (key === packet.t) console.log(key, totals[key], '\x1b[36m(latest)\x1b[0m')
-                    else console.log(key, totals[key])
+                    const type = tracked.includes(key) ? '\x1b[32m[tracked]\x1b[0m' : '\x1b[31m[ignored]\x1b[0m'
+                    if (key === packet.t) console.log(type, key, totals[key], '\x1b[36m(latest)\x1b[0m')
+                    else console.log(type, key, totals[key])
                 })
             }
 
@@ -43,18 +58,19 @@ module.exports = (client) => {
                 case 'MESSAGE_DELETE_BULK':
                     return messageDelete(client, packet, pool);
                 case 'MESSAGE_REACTION_ADD':
-                    return messageReaction.add(client, packet, pool);
                 case 'MESSAGE_REACTION_REMOVE':
-                    return messageReaction.remove(client, packet, pool);
                 case 'MESSAGE_REACTION_REMOVE_ALL':
-                    return messageReaction.removeAll(client, packet, pool);
                 case 'MESSAGE_REACTION_REMOVE_EMOJI':
-                    return messageReaction.removeEmoji(client, packet, pool);
+                    return messageReaction(client, packet, pool);
                 case 'PRESENCE_UPDATE':
                     return presenceUpdate(client, packet, pool);
                 case 'VOICE_STATE_UPDATE':
                     return voiceStateUpdate(client, packet, pool);
-                    // case 'CHANNEL_PINS_UPDATE': // This causes a message update too
+
+                case 'TYPING_START':
+                    return typingStart(client, packet, pool);
+
+                case 'CHANNEL_PINS_UPDATE': // This causes a message update too
                 default:
                     // return console.log('packet', packet.t);
                     return null;

@@ -1,39 +1,42 @@
 module.exports = (client, packet, pool) => {
     const data = packet.d;
-    return pool.getConnection().then(connection => {
+    data.epoch = new Date(data.edited_timestamp || data.timestamp).getTime();
+    return message(pool, data).then(() => {
         return Promise.all([
-            message(data, connection),
-            messageAuthor(data, connection),
-            messageMessageReference(data, connection),
-            messageMentionSpecial(data, connection),
-            messageMentionChannel(data, connection),
-            messageMentionRole(data, connection),
-            messageMentionUser(data, connection),
-            messageAttachment(data, connection),
-            messageSticker(data, connection),
-            messageEmbed(data, connection),
-            messageEmbedField(data, connection),
-            messageEmbedAuthor(data, connection),
-            messageEmbedFooter(data, connection),
-            messageEmbedImage(data, connection),
-            messageEmbedThumbnail(data, connection),
-            messageEmbedProvider(data, connection),
-            messageEmbedVideo(data, connection),
-        ]).then(res => {
-            connection.release();
-        }).catch(err => {
-            connection.release();
-            console.log('Critical error', err);
-        });
-    }).catch(err => {
-        console.log(err)
-        console.log('Database down...')
+            messageAuthor(pool, data),
+            messageReference(pool, data),
+            messageMentionSpecial(pool, data),
+            messageMentionChannel(pool, data),
+            messageMentionRole(pool, data),
+            messageMentionUser(pool, data),
+            messageActivity(pool, data),
+            messageApplication(pool, data),
+            messageAttachment(pool, data),
+            messageSticker(pool, data),
+            Promise.all(data.embeds.map((embed, embedIndex) => {
+                embed.index = embedIndex;
+                return messageEmbed(pool, data, embed).then(() => {
+                    return Promise.all([
+                        messageEmbedAuthor(pool, data, embed),
+                        messageEmbedFooter(pool, data, embed),
+                        messageEmbedImage(pool, data, embed),
+                        messageEmbedThumbnail(pool, data, embed),
+                        messageEmbedProvider(pool, data, embed),
+                        messageEmbedVideo(pool, data, embed),
+                        Promise.all((embed.fields || []).map((field, fieldIndex) => {
+                            field.index = fieldIndex;
+                            return messageEmbedField(pool, data, embed, field);
+                        }))
+                    ]);
+                })
+            }))
+        ]);
     });
 }
 
-function message(data, connection) {
-    return connection.query('REPLACE INTO message VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-        new Date(data.edited_timestamp || data.timestamp).getTime(),
+function message(pool, data) {
+    return pool.query('REPLACE INTO message VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+        data.epoch,
         data.id,
         data.guild_id ?? null,
         data.channel_id,
@@ -67,23 +70,23 @@ function message(data, connection) {
     ]);
 }
 
-function messageAuthor(data, connection) {
-    return connection.query('REPLACE INTO message_author VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [
-        new Date(data.edited_timestamp || data.timestamp).getTime(),
+function messageAuthor(pool, data) {
+    return pool.query('REPLACE INTO message_author VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [
+        data.epoch,
         data.id,
         data.author.username,
         data.author.id,
         data.author.discriminator,
         data.author.avatar,
         data.author.public_flags ?? null,
-        data.author.bot ?? null
+        data.author.bot ?? false
     ]);
 }
 
-function messageMessageReference(data, connection) {
+function messageReference(pool, data) {
     if (!data.message_reference) return Promise.resolve();
-    return connection.query('REPLACE INTO message_message_reference VALUES (?, ?, ?, ?, ?)', [
-        new Date(data.edited_timestamp || data.timestamp).getTime(),
+    return pool.query('REPLACE INTO message_reference VALUES (?, ?, ?, ?, ?)', [
+        data.epoch,
         data.id,
         data.message_reference.message_id,
         data.message_reference.channel_id,
@@ -91,61 +94,84 @@ function messageMessageReference(data, connection) {
     ]);
 }
 
-function messageMentionSpecial(data, connection) {
+function messageMentionSpecial(pool, data) {
     const matches = [...data.content.matchAll(/@(everyone|here)/g)];
-    return Promise.all(matches.map((match, pos) => {
-        return connection.query('REPLACE INTO message_mention_special VALUES (?, ?, ?, ?)', [
-            new Date(data.edited_timestamp || data.timestamp).getTime(),
+    return Promise.all(matches.map((match, mentionIndex) => {
+        return pool.query('REPLACE INTO message_mention_special VALUES (?, ?, ?, ?)', [
+            data.epoch,
             data.id,
-            pos,
+            mentionIndex,
             match[1].toUpperCase()
         ]);
     }));
 }
 
-function messageMentionChannel(data, connection) {
+function messageMentionChannel(pool, data) {
     const matches = [...data.content.matchAll(/<#(\d{17,19})>/g)];
-    return Promise.all(matches.map((match, pos) => {
-        return connection.query('REPLACE INTO message_mention_channel VALUES (?, ?, ?, ?)', [
-            new Date(data.edited_timestamp || data.timestamp).getTime(),
+    return Promise.all(matches.map((match, mentionIndex) => {
+        return pool.query('REPLACE INTO message_mention_channel VALUES (?, ?, ?, ?)', [
+            data.epoch,
             data.id,
-            pos,
+            mentionIndex,
             match[1]
         ]);
     }));
 }
 
-function messageMentionRole(data, connection) {
+function messageMentionRole(pool, data) {
     const matches = [...data.content.matchAll(/<@&(\d{17,19})>/g)];
-    return Promise.all(matches.map((match, pos) => {
-        return connection.query('REPLACE INTO message_mention_role VALUES (?, ?, ?, ?)', [
-            new Date(data.edited_timestamp || data.timestamp).getTime(),
+    return Promise.all(matches.map((match, mentionIndex) => {
+        return pool.query('REPLACE INTO message_mention_role VALUES (?, ?, ?, ?)', [
+            data.epoch,
             data.id,
-            pos,
+            mentionIndex,
             match[1]
         ]);
     }));
 }
 
-function messageMentionUser(data, connection) {
+function messageMentionUser(pool, data) {
     const matches = [...data.content.matchAll(/<@!?(\d{17,19})>/g)];
-    return Promise.all(matches.map((match, pos) => {
-        return connection.query('REPLACE INTO message_mention_user VALUES (?, ?, ?, ?)', [
-            new Date(data.edited_timestamp || data.timestamp).getTime(),
+    return Promise.all(matches.map((match, mentionIndex) => {
+        return pool.query('REPLACE INTO message_mention_user VALUES (?, ?, ?, ?)', [
+            data.epoch,
             data.id,
-            pos,
+            mentionIndex,
             match[1]
         ]);
     }));
 }
 
-function messageAttachment(data, connection) {
+function messageActivity(pool, data) {
+    if (!data.activity) return Promise.resolve();
+    return pool.query('REPLACE INTO message_activity VALUES (?, ?, ?, ?)', [
+        data.epoch,
+        data.id,
+        ['JOIN', 'SPECTATE', 'LISTEN', 'JOIN_REQUEST'][data.activity.type],
+        data.activity.party_id ?? null
+    ]);
+}
+
+function messageApplication(pool, data) {
+    if (!data.application) return Promise.resolve();
+    return pool.query('REPLACE INTO message_application VALUES (?, ?, ?, ?, ?, ?, ?)', [
+        data.epoch,
+        data.id,
+        data.application.id,
+        data.application.cover_image ?? null,
+        data.application.description,
+        data.application.icon ?? null,
+        data.application.name
+    ]);
+}
+
+function messageAttachment(pool, data) {
     if (!data.attachments) return Promise.resolve();
-    return Promise.all(data.attachments.map((attachment, pos) => {
-        return connection.query('REPLACE INTO message_attachment VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-            new Date(data.edited_timestamp || data.timestamp).getTime(),
+    return Promise.all(data.attachments.map((attachment, attachmentIndex) => {
+        return pool.query('REPLACE INTO message_attachment VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+            data.epoch,
             data.id,
-            pos,
+            attachmentIndex,
             attachment.id,
             attachment.filename,
             attachment.size,
@@ -157,13 +183,13 @@ function messageAttachment(data, connection) {
     }));
 }
 
-function messageSticker(data, connection) {
+function messageSticker(pool, data) {
     if (!data.stickers) return Promise.resolve();
-    return Promise.all(data.stickers.map((sticker, pos) => {
-        return connection.query('REPLACE INTO message_sticker VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-            new Date(data.edited_timestamp || data.timestamp).getTime(),
+    return Promise.all(data.stickers.map((sticker, stickerIndex) => {
+        return pool.query('REPLACE INTO message_sticker VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+            data.epoch,
             data.id,
-            pos,
+            stickerIndex,
             sticker.id,
             sticker.pack_id,
             sticker.name,
@@ -176,122 +202,103 @@ function messageSticker(data, connection) {
     }));
 }
 
-function messageEmbed(data, connection) {
-    return Promise.all(data.embeds.map((embed, pos) => {
-        return connection.query('REPLACE INTO message_embed VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-            new Date(data.edited_timestamp || data.timestamp).getTime(),
-            data.id,
-            pos,
-            embed.title ?? null,
-            embed.type ?? null,
-            embed.description ?? null,
-            embed.url ?? null,
-            embed.timestamp ? new Date(embed.timestamp).getTime() : null,
-            embed.color ?? null
-        ]);
-    }));
+function messageEmbed(pool, data, embed) {
+    return pool.query('REPLACE INTO message_embed VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+        data.epoch,
+        data.id,
+        embed.index,
+        embed.title ?? null,
+        embed.type ?? null,
+        embed.description ?? null,
+        embed.url ?? null,
+        embed.timestamp ? new Date(embed.timestamp).getTime() : null,
+        embed.color ?? null
+    ]);
 }
 
-function messageEmbedField(data, connection) {
-    return Promise.all(data.embeds.map((embed, pos) => {
-        if (!embed.fields) return Promise.resolve();
-        return Promise.all(embed.fields.map((field, fieldPos) => {
-            return connection.query('REPLACE INTO message_embed_field VALUES (?, ?, ?, ?, ?, ?, ?)', [
-                new Date(data.edited_timestamp || data.timestamp).getTime(),
-                data.id,
-                pos,
-                fieldPos,
-                field.name,
-                field.value,
-                field.inline ?? null
-            ]);
-        }));
-    }));
+function messageEmbedAuthor(pool, data, embed) {
+    if (!embed.author) return Promise.resolve();
+    return pool.query('REPLACE INTO message_embed_author VALUES (?, ?, ?, ?, ?, ?, ?)', [
+        data.epoch,
+        data.id,
+        embed.index,
+        embed.author.name ?? null,
+        embed.author.url ?? null,
+        embed.author.icon_url ?? null,
+        embed.author.proxy_icon_url ?? null
+    ]);
 }
 
-function messageEmbedAuthor(data, connection) {
-    return Promise.all(data.embeds.map((embed, pos) => {
-        if (!embed.author) return Promise.resolve();
-        return connection.query('REPLACE INTO message_embed_author VALUES (?, ?, ?, ?, ?, ?, ?)', [
-            new Date(data.edited_timestamp || data.timestamp).getTime(),
-            data.id,
-            pos,
-            embed.author.name ?? null,
-            embed.author.url ?? null,
-            embed.author.icon_url ?? null,
-            embed.author.proxy_icon_url ?? null
-        ]);
-    }));
+function messageEmbedFooter(pool, data, embed) {
+    if (!embed.footer) return Promise.resolve();
+    return pool.query('REPLACE INTO message_embed_footer VALUES (?, ?, ?, ?, ?, ?)', [
+        data.epoch,
+        data.id,
+        embed.index,
+        embed.footer.text,
+        embed.footer.icon_url ?? null,
+        embed.footer.proxy_icon_url ?? null
+    ]);
 }
 
-function messageEmbedFooter(data, connection) {
-    return Promise.all(data.embeds.map((embed, pos) => {
-        if (!embed.footer) return Promise.resolve();
-        return connection.query('REPLACE INTO message_embed_footer VALUES (?, ?, ?, ?, ?, ?)', [
-            new Date(data.edited_timestamp || data.timestamp).getTime(),
-            data.id,
-            pos,
-            embed.footer.text,
-            embed.footer.icon_url ?? null,
-            embed.footer.proxy_icon_url ?? null
-        ]);
-    }));
+function messageEmbedImage(pool, data, embed) {
+    if (!embed.image) return Promise.resolve();
+    return pool.query('REPLACE INTO message_embed_image VALUES (?, ?, ?, ?, ?, ?, ?)', [
+        data.epoch,
+        data.id,
+        embed.index,
+        embed.image.url ?? null,
+        embed.image.proxy_url ?? null,
+        embed.image.height ?? null,
+        embed.image.width ?? null,
+    ]);
 }
 
-function messageEmbedImage(data, connection) {
-    return Promise.all(data.embeds.map((embed, pos) => {
-        if (!embed.image) return Promise.resolve();
-        return connection.query('REPLACE INTO message_embed_image VALUES (?, ?, ?, ?, ?, ?, ?)', [
-            new Date(data.edited_timestamp || data.timestamp).getTime(),
-            data.id,
-            pos,
-            embed.image.url ?? null,
-            embed.image.proxy_url ?? null,
-            embed.image.height ?? null,
-            embed.image.width ?? null,
-        ]);
-    }));
+function messageEmbedThumbnail(pool, data, embed) {
+    if (!embed.thumbnail) return Promise.resolve();
+    return pool.query('REPLACE INTO message_embed_thumbnail VALUES (?, ?, ?, ?, ?, ?, ?)', [
+        data.epoch,
+        data.id,
+        embed.index,
+        embed.thumbnail.url ?? null,
+        embed.thumbnail.proxy_url ?? null,
+        embed.thumbnail.height ?? null,
+        embed.thumbnail.width ?? null,
+    ]);
 }
 
-function messageEmbedThumbnail(data, connection) {
-    return Promise.all(data.embeds.map((embed, pos) => {
-        if (!embed.thumbnail) return Promise.resolve();
-        return connection.query('REPLACE INTO message_embed_thumbnail VALUES (?, ?, ?, ?, ?, ?, ?)', [
-            new Date(data.edited_timestamp || data.timestamp).getTime(),
-            data.id,
-            pos,
-            embed.thumbnail.url ?? null,
-            embed.thumbnail.proxy_url ?? null,
-            embed.thumbnail.height ?? null,
-            embed.thumbnail.width ?? null,
-        ]);
-    }));
+function messageEmbedProvider(pool, data, embed) {
+    if (!embed.provider) return Promise.resolve();
+    return pool.query('REPLACE INTO message_embed_provider VALUES (?, ?, ?, ?, ?)', [
+        data.epoch,
+        data.id,
+        embed.index,
+        embed.provider.name ?? null,
+        embed.provider.url ?? null,
+    ]);
 }
 
-function messageEmbedProvider(data, connection) {
-    return Promise.all(data.embeds.map((embed, pos) => {
-        if (!embed.provider) return Promise.resolve();
-        return connection.query('REPLACE INTO message_embed_provider VALUES (?, ?, ?, ?, ?)', [
-            new Date(data.edited_timestamp || data.timestamp).getTime(),
-            data.id,
-            pos,
-            embed.provider.name ?? null,
-            embed.provider.url ?? null,
-        ]);
-    }));
+function messageEmbedVideo(pool, data, embed) {
+    if (!embed.video) return Promise.resolve();
+    return pool.query('REPLACE INTO message_embed_video VALUES (?, ?, ?, ?, ?, ?, ?)', [
+        data.epoch,
+        data.id,
+        embed.index,
+        embed.video.url ?? null,
+        embed.video.proxy_url ?? null,
+        embed.video.height ?? null,
+        embed.video.width ?? null
+    ]);
 }
 
-function messageEmbedVideo(data, connection) {
-    return Promise.all(data.embeds.map((embed, pos) => {
-        if (!embed.video) return Promise.resolve();
-        return connection.query('REPLACE INTO message_embed_video VALUES (?, ?, ?, ?, ?, ?, ?)', [
-            new Date(data.edited_timestamp || data.timestamp).getTime(),
-            data.id,
-            pos,
-            embed.video.url ?? null,
-            embed.video.proxy_url ?? null,
-            embed.video.height ?? null,
-            embed.video.width ?? null
-        ]);
-    }));
+function messageEmbedField(pool, data, embed, field) {
+    return pool.query('REPLACE INTO message_embed_field VALUES (?, ?, ?, ?, ?, ?, ?)', [
+        data.epoch,
+        data.id,
+        embed.index,
+        field.index,
+        field.name,
+        field.value,
+        field.inline ?? false
+    ]);
 }

@@ -4,8 +4,8 @@ module.exports = (client, packet, pool) => {
     return presence(pool, data).then(() => {
         return Promise.all([
             presenceClientStatus(pool, data),
-            Promise.all(data.activities.map((activity, activityPos) => {
-                activity.pos = activityPos;
+            Promise.all(data.activities.map((activity, activityIndex) => {
+                activity.index = activityIndex;
                 return presenceActivity(pool, data, activity).then(() => {
                     return Promise.all[
                         presenceActivityTimestamps(pool, data, activity),
@@ -43,7 +43,7 @@ function presenceActivity(pool, data, activity) {
     return pool.query('REPLACE INTO presence_activity VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
         data.epoch,
         data.user.id,
-        activity.pos,
+        activity.index,
         activity.name,
         ['GAME', 'STREAMING', 'LISTENING', 'CUSTOM', 'COMPETING'][activity.type],
         activity.id ?? null,
@@ -62,7 +62,7 @@ function presenceActivityTimestamps(pool, data, activity) {
     return pool.query('REPLACE INTO presence_activity_timestamps VALUES (?, ?, ?, ?, ?)', [
         data.epoch,
         data.user.id,
-        activity.pos,
+        activity.index,
         activity.timestamps?.start ?? null,
         activity.timestamps?.end ?? null
     ]);
@@ -73,7 +73,7 @@ function presenceActivitySecrets(pool, data, activity) {
     return pool.query('REPLACE INTO presence_activity_secrets VALUES (?, ?, ?, ?, ?, ?)', [
         data.epoch,
         data.user.id,
-        activity.pos,
+        activity.index,
         activity.secrets?.join ?? null,
         activity.secrets?.spectate ?? null,
         activity.secrets?.match ?? null
@@ -85,7 +85,7 @@ function presenceActivityParty(pool, data, activity) {
     return pool.query('REPLACE INTO presence_activity_party VALUES (?, ?, ?, ?, ?, ?)', [
         data.epoch,
         data.user.id,
-        activity.pos,
+        activity.index,
         activity.party.id ?? null,
         activity.party.size?. [0] ?? null,
         activity.party.size?. [1] ?? null
@@ -97,7 +97,7 @@ function presenceActivityEmoji(pool, data, activity) {
     return pool.query('REPLACE INTO presence_activity_emoji VALUES (?, ?, ?, ?, ?, ?)', [
         data.epoch,
         data.user.id,
-        activity.pos,
+        activity.index,
         activity.emoji.name,
         activity.emoji.id ?? null,
         activity.emoji.animated ?? false
@@ -109,7 +109,7 @@ function presenceActivityAssets(pool, data, activity) {
     return pool.query('REPLACE INTO presence_activity_assets VALUES (?, ?, ?, ?, ?, ?, ?)', [
         data.epoch,
         data.user.id,
-        activity.pos,
+        activity.index,
         activity.assets.large_image ?? null,
         activity.assets.large_text ?? null,
         activity.assets.small_image ?? null,

@@ -25,14 +25,14 @@ CREATE TABLE presence_client_status (
     mobile ENUM('ONLINE', 'IDLE', 'DND', 'OFFLINE') NOT NULL,
     web ENUM('ONLINE', 'IDLE', 'DND', 'OFFLINE') NOT NULL,
     CONSTRAINT id PRIMARY KEY(epoch, user_id),
-    FOREIGN KEY (epoch, user_id) REFERENCES presence(epoch, user_id)
+    FOREIGN KEY (epoch, user_id) REFERENCES presence(epoch, user_id) ON DELETE CASCADE
 );
 
 -- https://discord.com/developers/docs/topics/gateway#activity-object-activity-structure
 CREATE TABLE presence_activity (
     epoch BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    pos INT NOT NULL,
+    activity_index INT NOT NULL,
     name VARCHAR(256) NOT NULL,
     type ENUM('GAME', 'STREAMING', 'LISTENING', 'CUSTOM', 'COMPETING') NOT NULL,
     activity_id VARCHAR(256),
@@ -43,66 +43,66 @@ CREATE TABLE presence_activity (
     state VARCHAR(256),
     instance BOOLEAN NOT NULL,
     flags INT,
-    CONSTRAINT id PRIMARY KEY(epoch, user_id, pos),
-    FOREIGN KEY (epoch, user_id) REFERENCES presence(epoch, user_id)
+    CONSTRAINT id PRIMARY KEY(epoch, user_id, activity_index),
+    FOREIGN KEY (epoch, user_id) REFERENCES presence(epoch, user_id) ON DELETE CASCADE
 );
 
 -- https://discord.com/developers/docs/topics/gateway#activity-object-activity-timestamps
 CREATE TABLE presence_activity_timestamps (
     epoch BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    pos INT NOT NULL,
+    activity_index INT NOT NULL,
     start BIGINT,
     end BIGINT,
-    CONSTRAINT id PRIMARY KEY(epoch, user_id, pos),
-    FOREIGN KEY (epoch, user_id, pos) REFERENCES presence_activity(epoch, user_id, pos)
+    CONSTRAINT id PRIMARY KEY(epoch, user_id, activity_index),
+    FOREIGN KEY (epoch, user_id, activity_index) REFERENCES presence_activity(epoch, user_id, activity_index) ON DELETE CASCADE
 );
 
 -- https://discord.com/developers/docs/topics/gateway#activity-object-activity-secrets
 CREATE TABLE presence_activity_secrets (
     epoch BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    pos INT NOT NULL,
+    activity_index INT NOT NULL,
     join_secret VARCHAR(256),
     spectate_secret VARCHAR(256),
     match_secret VARCHAR(256),
-    CONSTRAINT id PRIMARY KEY(epoch, user_id, pos),
-    FOREIGN KEY (epoch, user_id, pos) REFERENCES presence_activity(epoch, user_id, pos)
+    CONSTRAINT id PRIMARY KEY(epoch, user_id, activity_index),
+    FOREIGN KEY (epoch, user_id, activity_index) REFERENCES presence_activity(epoch, user_id, activity_index) ON DELETE CASCADE
 );
 
 -- https://discord.com/developers/docs/topics/gateway#activity-object-activity-party
 CREATE TABLE presence_activity_party (
     epoch BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    pos INT NOT NULL,
+    activity_index INT NOT NULL,
     party_id VARCHAR(256),
     current_size INT,
     max_size INT,
-    CONSTRAINT id PRIMARY KEY(epoch, user_id, pos),
-    FOREIGN KEY (epoch, user_id, pos) REFERENCES presence_activity(epoch, user_id, pos)
+    CONSTRAINT id PRIMARY KEY(epoch, user_id, activity_index),
+    FOREIGN KEY (epoch, user_id, activity_index) REFERENCES presence_activity(epoch, user_id, activity_index) ON DELETE CASCADE
 );
 
 -- https://discord.com/developers/docs/topics/gateway#activity-object-activity-emoji
 CREATE TABLE presence_activity_emoji (
     epoch BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    pos INT NOT NULL,
+    activity_index INT NOT NULL,
     name VARCHAR(256) NOT NULL,
     emoji_id BIGINT,
     animated BOOLEAN NOT NULL,
-    CONSTRAINT id PRIMARY KEY(epoch, user_id, pos),
-    FOREIGN KEY (epoch, user_id, pos) REFERENCES presence_activity(epoch, user_id, pos)
+    CONSTRAINT id PRIMARY KEY(epoch, user_id, activity_index),
+    FOREIGN KEY (epoch, user_id, activity_index) REFERENCES presence_activity(epoch, user_id, activity_index) ON DELETE CASCADE
 );
 
 -- https://discord.com/developers/docs/topics/gateway#activity-object-activity-assets
 CREATE TABLE presence_activity_assets (
     epoch BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    pos INT NOT NULL,
+    activity_index INT NOT NULL,
     large_image VARCHAR(256),
     large_text VARCHAR(256),
     small_image VARCHAR(256),
     small_text VARCHAR(256),
-    CONSTRAINT id PRIMARY KEY(epoch, user_id, pos),
-    FOREIGN KEY (epoch, user_id, pos) REFERENCES presence_activity(epoch, user_id, pos)
+    CONSTRAINT id PRIMARY KEY(epoch, user_id, activity_index),
+    FOREIGN KEY (epoch, user_id, activity_index) REFERENCES presence_activity(epoch, user_id, activity_index) ON DELETE CASCADE
 );
