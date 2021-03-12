@@ -51,29 +51,29 @@ module.exports = (client) => {
 
             switch (packet.t) {
                 case 'MESSAGE_CREATE':
-                    return messageCreate(client, packet, pool);
+                    return resolve(messageCreate(client, packet, pool));
                 case 'MESSAGE_UPDATE':
-                    return messageUpdate(client, packet, pool);
+                    return resolve(messageUpdate(client, packet, pool));
                 case 'MESSAGE_DELETE':
                 case 'MESSAGE_DELETE_BULK':
-                    return messageDelete(client, packet, pool);
+                    return resolve(messageDelete(client, packet, pool));
                 case 'MESSAGE_REACTION_ADD':
                 case 'MESSAGE_REACTION_REMOVE':
                 case 'MESSAGE_REACTION_REMOVE_ALL':
                 case 'MESSAGE_REACTION_REMOVE_EMOJI':
-                    return messageReaction(client, packet, pool);
+                    return resolve(messageReaction(client, packet, pool));
                 case 'PRESENCE_UPDATE':
-                    return presenceUpdate(client, packet, pool);
+                    return resolve(presenceUpdate(client, packet, pool));
                 case 'VOICE_STATE_UPDATE':
-                    return voiceStateUpdate(client, packet, pool);
+                    return resolve(voiceStateUpdate(client, packet, pool));
 
                 case 'TYPING_START':
-                    return typingStart(client, packet, pool);
+                    return resolve(typingStart(client, packet, pool));
 
                 case 'CHANNEL_PINS_UPDATE': // This causes a message update too
                 default:
                     // return console.log('packet', packet.t);
-                    return null;
+                    return resolve();
             }
         }).catch(err => {
             console.log('Database Error', err);

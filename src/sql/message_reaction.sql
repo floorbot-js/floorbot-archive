@@ -8,7 +8,7 @@ CREATE TABLE message_reaction (
     user_id BIGINT NOT NULL,
     channel_id BIGINT NOT NULL,
     guild_id BIGINT,
-    emoji_name VARCHAR(256) NOT NULL,
+    emoji_name VARCHAR(512) NOT NULL,
     emoji_id BIGINT NOT NULL,
     emoji_animated BOOLEAN NOT NULL,
     action ENUM('ADD', 'REMOVE') NOT NULL,

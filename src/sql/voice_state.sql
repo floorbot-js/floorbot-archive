@@ -7,7 +7,7 @@ CREATE TABLE voice_state (
     guild_id BIGINT,
     channel_id BIGINT,
     user_id BIGINT NOT NULL,
-    session_id VARCHAR(256) NOT NULL,
+    session_id VARCHAR(512) NOT NULL,
     deaf BOOLEAN NOT NULL,
     mute BOOLEAN NOT NULL,
     self_deaf BOOLEAN NOT NULL,
