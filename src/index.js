@@ -5,7 +5,7 @@ module.exports = (client) => {
         user: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME,
-        connectionLimit: 100,
+        connectionLimit: 25,
         supportBigInt: true
     });
     pool.getConnection().then(conn => {
@@ -22,6 +22,7 @@ module.exports = (client) => {
     const presenceUpdate = require('./archivers/presenceUpdate');
     const voiceStateUpdate = require('./archivers/voiceStateUpdate');
     const typingStart = require('./archivers/typingStart');
+    const guildMemberUpdate = require('./archivers/guildMemberUpdate');
 
     const tracked = [
         'MESSAGE_CREATE',
@@ -34,7 +35,8 @@ module.exports = (client) => {
         'MESSAGE_REACTION_REMOVE_EMOJI',
         'PRESENCE_UPDATE',
         'VOICE_STATE_UPDATE',
-        'TYPING_START'
+        'TYPING_START',
+        'GUILD_MEMBER_UPDATE'
     ];
     const totals = {};
     client.on('raw', packet => {
@@ -66,9 +68,10 @@ module.exports = (client) => {
                     return resolve(presenceUpdate(client, packet, pool));
                 case 'VOICE_STATE_UPDATE':
                     return resolve(voiceStateUpdate(client, packet, pool));
-
                 case 'TYPING_START':
                     return resolve(typingStart(client, packet, pool));
+                case 'GUILD_MEMBER_UPDATE':
+                    return resolve(guildMemberUpdate(client, packet, pool));
 
                 case 'CHANNEL_PINS_UPDATE': // This causes a message update too
                 default:
