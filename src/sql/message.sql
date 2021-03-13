@@ -34,25 +34,7 @@ CREATE TABLE message (
     mention_everyone BOOLEAN NOT NULL,
     pinned BOOLEAN NOT NULL,
     webhook_id BIGINT,
-    type ENUM(
-        'DEFAULT',
-        'RECIPIENT_ADD',
-        'RECIPIENT_REMOVE',
-        'CALL',
-        'CHANNEL_NAME_CHANGE',
-        'CHANNEL_ICON_CHANGE',
-        'CHANNEL_PINNED_MESSAGE',
-        'GUILD_MEMBER_JOIN',
-        'USER_PREMIUM_GUILD_SUBSCRIPTION',
-        'USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1',
-        'USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2',
-        'USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3',
-        'CHANNEL_FOLLOW_ADD',
-        'GUILD_DISCOVERY_DISQUALIFIED',
-        'GUILD_DISCOVERY_REQUALIFIED',
-        'REPLY',
-        'APPLICATION_COMMAND'
-    ) NOT NULL,
+    type INT NOT NULL,
     flags INT,
     CONSTRAINT id PRIMARY KEY (epoch, message_id)
 );
@@ -128,7 +110,7 @@ CREATE TABLE message_mention_user (
 CREATE TABLE message_activity (
     epoch BIGINT NOT NULL,
     message_id BIGINT NOT NULL,
-    type ENUM('JOIN', 'SPECTATE', 'LISTEN', 'JOIN_REQUEST') NOT NULL,
+    type INT NOT NULL,
     party_id VARCHAR(512),
     CONSTRAINT id PRIMARY KEY (epoch, message_id),
     FOREIGN KEY (epoch, message_id) REFERENCES message(epoch, message_id) ON DELETE CASCADE
@@ -170,7 +152,7 @@ CREATE TABLE message_sticker (
     tags VARCHAR(512),
     asset VARCHAR(512) NOT NULL,
     preview_asset VARCHAR(512),
-    format_type ENUM('PNG', 'APNG', 'LOTTIE') NOT NULL,
+    format_type INT NOT NULL,
     CONSTRAINT id PRIMARY KEY (epoch, message_id, sticker_index),
     FOREIGN KEY (epoch, message_id) REFERENCES message(epoch, message_id) ON DELETE CASCADE
 );

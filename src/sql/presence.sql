@@ -34,7 +34,7 @@ CREATE TABLE presence_activity (
     user_id BIGINT NOT NULL,
     activity_index INT NOT NULL,
     name VARCHAR(512) NOT NULL,
-    type ENUM('GAME', 'STREAMING', 'LISTENING', 'CUSTOM', 'COMPETING') NOT NULL,
+    type INT NOT NULL,
     activity_id VARCHAR(512),
     url VARCHAR(2083),
     created_at BIGINT NOT NULL,

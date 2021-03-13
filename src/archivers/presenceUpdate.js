@@ -45,7 +45,7 @@ function presenceActivity(pool, data, activity) {
         data.user.id,
         activity.index,
         activity.name,
-        ['GAME', 'STREAMING', 'LISTENING', 'CUSTOM', 'COMPETING'][activity.type],
+        activity.type,
         activity.id ?? null,
         activity.url ?? null,
         activity.created_at,
