@@ -9,20 +9,21 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/floorbot-js/floorbot.git"
+        "url": "git+https://github.com/floorbot-js/floorbot-archive.git"
     },
     "author": "Arcadeena",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/floorbot-js/floorbot/issues"
+        "url": "https://github.com/floorbot-js/floorbot-archive/issues"
     },
-    "homepage": "https://github.com/floorbot-js/floorbot#readme",
+    "homepage": "https://github.com/floorbot-js/floorbot-archive#readme",
     "devDependencies": {
         "nodemon": "^2.0.7",
         "dotenv": "^8.2.0"
     },
     "dependencies": {
-        "discord.js": "^12.5.1",
+        "discord.js": "git://github.com/devsnek/discord.js.git#interactions",
+        "discord.js-commands": "git://github.com/floorbot-js/discord.js-commands.git",
         "mariadb": "^2.5.3"
     }
 }
