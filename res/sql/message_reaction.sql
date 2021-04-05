@@ -1,6 +1,3 @@
--- -- DROP ALL TABLES IN ORDER
--- DROP TABLE message_reaction;
-
 -- https://discord.com/developers/docs/resources/channel#reaction-object-reaction-structure
 CREATE TABLE message_reaction (
     epoch BIGINT NOT NULL,

@@ -1,0 +1,20 @@
+-- https://discord.com/developers/docs/resources/user#user-object-user-structure
+CREATE TABLE guild_member_user (
+    epoch BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    guild_id BIGINT NOT NULL,
+    username VARCHAR(512) NOT NULL,
+    discriminator VARCHAR(4) NOT NULL,
+    avatar VARCHAR(512),
+    bot BOOLEAN NOT NULL,
+    system BOOLEAN NOT NULL,
+    mfa_enabled BOOLEAN,
+    locale VARCHAR(512),
+    verified BOOLEAN,
+    email VARCHAR(512),
+    flags INT,
+    premium_type INT,
+    public_flags INT,
+    CONSTRAINT id PRIMARY KEY(epoch, user_id, guild_id),
+    FOREIGN KEY (epoch, user_id, guild_id) REFERENCES guild_member(epoch, user_id, guild_id) ON DELETE CASCADE
+);

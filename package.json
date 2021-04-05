@@ -22,7 +22,7 @@
         "dotenv": "^8.2.0"
     },
     "dependencies": {
-        "discord.js": "git://github.com/devsnek/discord.js.git#interactions",
+        "discord.js": "git://github.com/vaporox/discord.js.git#feat-interactions",
         "discord.js-commands": "git://github.com/floorbot-js/discord.js-commands.git",
         "mariadb": "^2.5.3"
     }

@@ -1,4 +1,4 @@
-const ArchiveTask = require('../classes/ArchiveTask');
+const ArchiveTask = require('../ArchiveTask');
 
 module.exports = class ArchiveMessage extends ArchiveTask {
     constructor(client, options) {

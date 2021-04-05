@@ -1,6 +1,3 @@
--- -- DROP ALL TABLES IN ORDER
--- DROP TABLE voice_state;
-
 -- https://discord.com/developers/docs/resources/voice#voice-state-object
 CREATE TABLE voice_state (
     epoch BIGINT NOT NULL,

@@ -1,6 +1,3 @@
--- -- DROP ALL TABLES IN ORDER
--- DROP TABLE message_delete;
-
 -- https://discord.com/developers/docs/topics/gateway#message-delete-message-delete-event-fields
 CREATE TABLE message_delete (
     epoch BIGINT NOT NULL,
