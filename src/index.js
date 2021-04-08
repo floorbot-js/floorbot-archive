@@ -67,11 +67,11 @@ module.exports = (CommandClient, pool) => class extends CommandClient {
                     ])
                 }).then(results => {
                     const error = results.find(result => result.reason && result.reason.code && result.reason.code !== 'ER_TABLE_EXISTS_ERROR');
-                    if (!error) return this.emit('log', '[SETUP](AniList) database setup successful');
+                    if (!error) return this.emit('log', '[SETUP](Archive) database setup successful');
                     else return Promise.reject(error);
                 }).catch(error => {
                     console.log(error)
-                    this.emit('log', '[SETUP](AniList) database setup failed', error)
+                    this.emit('log', '[SETUP](Archive) database setup failed', error)
                 })
             }
         )
