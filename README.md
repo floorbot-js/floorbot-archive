@@ -11,7 +11,7 @@ An archive bot for tracking user and guild data
 
 ### Environment Variables
 
-These booru environment variabes are _optional_ and can be added with a `.env` file with the following format.
+These database environment variables are _required_ and can be added with a `.env` file with the following format.
 
 ```dosini
 # .env.example, committed to repo
