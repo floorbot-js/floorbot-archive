@@ -10,7 +10,7 @@ const pool = mariadb.createPool({
     supportBigInt: true
 });
 
-const testDB = function(client) {
+function testDB(client) {
     return pool.query().then(res => client.emit('log', `[SETUP] Connected to database <${process.env.DB_NAME}>`))
         .catch(error => client.emit('log', `[SETUP] Failed to connect to database <${process.env.DB_NAME}>`, error))
 }
