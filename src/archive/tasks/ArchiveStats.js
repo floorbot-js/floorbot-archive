@@ -10,7 +10,7 @@ module.exports = class ArchiveStats extends ArchiveTask {
     initialise() {
         this.log();
         if (this.intervalId) clearInterval(this.intervalId);
-        return this.intervalId = setInterval(() => this.log(), 1000 * 60 * 60);
+        return this.intervalId = setInterval(() => this.log(), 1000 * 60 * 60 * 12);
     }
 
     finalise() {

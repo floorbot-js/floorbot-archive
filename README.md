@@ -2,7 +2,30 @@
 
 An archive bot for tracking user and guild data
 
-## Archivers
+### Useful Commands
+
+```bash
+> git clone https://github.com/floorbot-js/floorbot-archive  ## Cloning the repository
+> npm install git://github.com/floorbot-js/floorbot-archive  ## Installing the repository
+```
+
+### Environment Variables
+
+These booru environment variabes are _optional_ and can be added with a `.env` file with the following format.
+
+```dosini
+# .env.example, committed to repo
+
+DISCORD_TOKEN = <Discord Token>
+DISCORD_PUBLIC_KEY = <Discord Public Key>
+
+DB_HOST = <Database IP>
+DB_NAME = <Database Name>
+DB_USERNAME = <Database Username>
+DB_PASSWORD = <Database Password>
+```
+
+## Archivers Progress
 
 These are the different archivers and the events they track
 
