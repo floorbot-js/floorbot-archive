@@ -30,4 +30,4 @@ client.on('ready', () => client.emit('log', `[SETUP] Logged in as <${client.user
     await testDB(client);
     await archive.setup(client);
     await client.login();
-})()
+})();
